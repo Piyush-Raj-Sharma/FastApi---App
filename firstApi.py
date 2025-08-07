@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, Path, Query, HTTPException
 from pydantic import BaseModel, Extra 
-# from typing import Optional
+from typing import Optional
 
 app = FastAPI()
 
@@ -63,18 +63,18 @@ class Student(BaseModel):
 # # - extra = Extra.forbid prevents unexpected fields in the request body
 # #   (e.g., sending "house": 13 will raise a validation error)
 # # --------------------------------------------------------------------
-# class UpdateStudent(BaseModel):
-#     name: Optional[str] = None
-#     age: Optional[int] = None
-#     classs: Optional[str] = None
-#     email: Optional[str] = None
-#     city: Optional[str] = None
+class UpdateStudent(BaseModel):
+    name: Optional[str] = None
+    age: Optional[int] = None
+    classs: Optional[str] = None
+    email: Optional[str] = None
+    city: Optional[str] = None
 
-#     class Config:  
+    class Config:  
 #     # By default, Pydantic allows extra fields in the request body that are not defined in the model.
 #     # Using 'extra = Extra.forbid' enforces strict validation — any unexpected or undefined fields
 #     # will raise a validation error instead of being silently ignored.
-#         extra = Extra.forbid
+        extra = Extra.forbid
 
 # # --------------------------------------------------------------------
 # # Basic root endpoint
@@ -154,30 +154,30 @@ def create_student(
 # # - Each field is checked for None before updating.
 # # - The update is done directly in the in-memory 'students' dictionary.
 # # --------------------------------------------------------------------
-# @app.put("/update-student/{student_id}")
-# def update_student(
-#     *,
-#     student_id: int = Path(..., description="The ID of the student you want to update"),
-#     student: UpdateStudent
-# ):
-#     # Check if the student exists
-#     if student_id not in students:
-#         return {"Error": "Student doesn't exist"}
+@app.put("/update-student/{student_id}")
+def update_student(
+    *,
+    student_id: int = Path(..., description="The ID of the student you want to update"),
+    student: UpdateStudent
+):
+    # Check if the student exists
+    if student_id not in students:
+        return {"Error": "Student doesn't exist"}
 
-#     # Update each field only if it's provided in the request
-#     if student.name is not None:
-#         students[student_id]['name'] = student.name
-#     if student.age is not None:
-#         students[student_id]['age'] = student.age
-#     if student.classs is not None:
-#         students[student_id]["classs"] = student.classs
-#     if student.email is not None:
-#         students[student_id]["email"] = student.email
-#     if student.city is not None:
-#         students[student_id]['city'] = student.city
+    # Update each field only if it's provided in the request
+    if student.name is not None:
+        students[student_id]['name'] = student.name
+    if student.age is not None:
+        students[student_id]['age'] = student.age
+    if student.classs is not None:
+        students[student_id]["classs"] = student.classs
+    if student.email is not None:
+        students[student_id]["email"] = student.email
+    if student.city is not None:
+        students[student_id]['city'] = student.city
 
-#     # Return the updated student record
-#     return students[student_id]
+    # Return the updated student record
+    return students[student_id]
 
 # # --------------------------------------------------------------------
 # # Endpoint to delete existing student 
