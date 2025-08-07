@@ -184,13 +184,13 @@ def update_student(
 # # - Accepts path param for student_id
 # # - Deletes the student with the specified student_id
 # # --------------------------------------------------------------------
-# @app.delete('/delete-student/{student_id}')
-# def delete_student(student_id : int = Path(..., description="The ID of the student you want to delete")):
-#     if student_id not in students:
-#         return {"Error" : "Student does not exists"}
+@app.delete('/delete-student/{student_id}')
+def delete_student(student_id : int = Path(..., description="The ID of the student you want to delete")):
+    if student_id not in students:
+        return {"Error" : "Student does not exists"}
     
-#     del students[student_id]
-#     return {"data" : "Student deleted successfully"}
+    del students[student_id]
+    return {"data" : "Student deleted successfully"}
     
 
 # # --------------------------------------------------------------------
