@@ -9,43 +9,43 @@ app = FastAPI()
 # # --------------------------------------------------------------------
 # # Simulated in-memory database: student records stored in a dictionary
 # # --------------------------------------------------------------------
-# students = {
-#     1: {
-#         "name": "Aarav Mehta",
-#         "age": 17,
-#         "classs": "Grade 12",
-#         "email": "aarav.mehta@example.com",
-#         "city": "Mumbai"
-#     },
-#     2: {
-#         "name": "Ananya Singh",
-#         "age": 16,
-#         "classs": "Grade 11",
-#         "email": "ananya.singh@example.com",
-#         "city": "Delhi"
-#     },
-#     3: {
-#         "name": "Rahul Verma",
-#         "age": 18,
-#         "classs": "Grade 12",
-#         "email": "rahul.verma@example.com",
-#         "city": "Bangalore"
-#     },
-#     4: {
-#         "name": "Meera Nair",
-#         "age": 15,
-#         "classs": "Grade 10",
-#         "email": "meera.nair@example.com",
-#         "city": "Chennai"
-#     },
-#     5: {
-#         "name": "Dev Sharma",
-#         "age": 17,
-#         "classs": "Grade 11",
-#         "email": "dev.sharma@example.com",
-#         "city": "Pune"
-#     }
-# }
+students = {
+    1: {
+        "name": "Aarav Mehta",
+        "age": 17,
+        "classs": "Grade 12",
+        "email": "aarav.mehta@example.com",
+        "city": "Mumbai"
+    },
+    2: {
+        "name": "Ananya Singh",
+        "age": 16,
+        "classs": "Grade 11",
+        "email": "ananya.singh@example.com",
+        "city": "Delhi"
+    },
+    3: {
+        "name": "Rahul Verma",
+        "age": 18,
+        "classs": "Grade 12",
+        "email": "rahul.verma@example.com",
+        "city": "Bangalore"
+    },
+    4: {
+        "name": "Meera Nair",
+        "age": 15,
+        "classs": "Grade 10",
+        "email": "meera.nair@example.com",
+        "city": "Chennai"
+    },
+    5: {
+        "name": "Dev Sharma",
+        "age": 17,
+        "classs": "Grade 11",
+        "email": "dev.sharma@example.com",
+        "city": "Pune"
+    }
+}
 
 # # --------------------------------------------------------------------
 # # Pydantic model to validate and structure student data in requests
@@ -88,24 +88,24 @@ def index():
 # # - Uses Path parameters with descriptions
 # # - Includes additional validation using Query parameters: gt and lt
 # # --------------------------------------------------------------------
-# @app.get("/get-student/{student_id}")
-# def get_student(
-#     student_id: int = Path(..., description="The ID of the student you want to view"), 
-#     gt: int = Query(..., gt=-1, description="Student ID must be greater than this value"),   
-#     lt: int = Query(..., lt=100, description="Student ID must be less than this value")
-# ):
-#     # Check that the student_id is within allowed range
-#     if student_id <= gt:
-#         raise HTTPException(status_code=400, detail="student_id must be greater than gt")
-#     if student_id >= lt:
-#         raise HTTPException(status_code=400, detail="student_id must be less than lt")
+@app.get("/get-student/{student_id}")
+def get_student(
+    student_id: int = Path(..., description="The ID of the student you want to view"), 
+    gt: int = Query(..., gt=-1, description="Student ID must be greater than this value"),   
+    lt: int = Query(..., lt=100, description="Student ID must be less than this value")
+):
+    # Check that the student_id is within allowed range
+    if student_id <= gt:
+        raise HTTPException(status_code=400, detail="student_id must be greater than gt")
+    if student_id >= lt:
+        raise HTTPException(status_code=400, detail="student_id must be less than lt")
 
-#     # If student not found in the database, return 404
-#     if student_id not in students:
-#         raise HTTPException(status_code=404, detail="Student not found")
+    # If student not found in the database, return 404
+    if student_id not in students:
+        raise HTTPException(status_code=404, detail="Student not found")
     
-#     # Return student data
-#     return students[student_id]
+    # Return student data
+    return students[student_id]
 
 # # --------------------------------------------------------------------
 # # Endpoint to fetch a student by query parameters
