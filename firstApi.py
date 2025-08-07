@@ -1,7 +1,7 @@
 # # This is the first FastAPI app
 
 from fastapi import FastAPI, Path, Query, HTTPException
-# from pydantic import BaseModel, Extra 
+from pydantic import BaseModel, Extra 
 # from typing import Optional
 
 app = FastAPI()
@@ -50,12 +50,12 @@ students = {
 # # --------------------------------------------------------------------
 # # Pydantic model to validate and structure student data in requests
 # # --------------------------------------------------------------------
-# class Student(BaseModel):
-#     name: str
-#     age: int
-#     classs: str
-#     email: str
-#     city: str
+class Student(BaseModel):
+    name: str
+    age: int
+    classs: str
+    email: str
+    city: str
     
 # # --------------------------------------------------------------------
 # # Pydantic model for updating student data
@@ -133,19 +133,19 @@ def get_student(
 # # - Accepts path param for student_id
 # # - Accepts request body containing student info using Pydantic model
 # # --------------------------------------------------------------------
-# @app.post("/create-student/{student_id}")
-# def create_student(
-#     *,
-#     student_id: int = Path(..., description="The ID of the student you want to create"), 
-#     student: Student
-# ):
-#     # Prevent duplicate student entries based on student_id
-#     if student_id in students:
-#         return {"Error": "Student already exists"}
+@app.post("/create-student/{student_id}")
+def create_student(
+    *,
+    student_id: int = Path(..., description="The ID of the student you want to create"), 
+    student: Student
+):
+    # Prevent duplicate student entries based on student_id
+    if student_id in students:
+        return {"Error": "Student already exists"}
 
-#     # Add new student to the in-memory database
-#     students[student_id] = student
-#     return students[student_id]
+    # Add new student to the in-memory database
+    students[student_id] = student
+    return students[student_id]
 
 # # --------------------------------------------------------------------
 # # This endpoint updates an existing student's information.
