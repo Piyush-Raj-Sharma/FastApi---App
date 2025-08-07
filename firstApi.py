@@ -113,20 +113,20 @@ def get_student(
 # # - Name is optional, age is required
 # # --------------------------------------------------------------------
 # @app.get("/get-by-name")
-# def get_student(
-#     *,
-#     name: str = Query(None, description="Name of the student"),  # Optional query param
-#     age: int = Query(..., description="Age of the student")       # Required query param
-# ):
-#     # Iterate through the student database
-#     for student_id in students:
-#         student = students[student_id]
-#         # Match both name and age
-#         if student["name"] == name and student["age"] == age:
-#             return student
+def get_student(
+    *,
+    name: str = Query(None, description="Name of the student"),  # Optional query param
+    age: int = Query(..., description="Age of the student")       # Required query param
+):
+    # Iterate through the student database
+    for student_id in students:
+        student = students[student_id]
+        # Match both name and age
+        if student["name"] == name and student["age"] == age:
+            return student
 
-#     # If no match found
-#     return {"data": "Student not found"}
+    # If no match found
+    return {"data": "Student not found"}
 
 # # --------------------------------------------------------------------
 # # Endpoint to create a new student entry
