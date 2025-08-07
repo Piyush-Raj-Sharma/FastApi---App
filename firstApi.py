@@ -1,10 +1,10 @@
 # # This is the first FastAPI app
 
-# from fastapi import FastAPI, Path, Query, HTTPException
+from fastapi import FastAPI, Path, Query, HTTPException
 # from pydantic import BaseModel, Extra 
 # from typing import Optional
 
-# app = FastAPI()
+app = FastAPI()
 
 # # --------------------------------------------------------------------
 # # Simulated in-memory database: student records stored in a dictionary
@@ -79,9 +79,9 @@
 # # --------------------------------------------------------------------
 # # Basic root endpoint
 # # --------------------------------------------------------------------
-# @app.get("/")
-# def index():
-#     return {"name": "Piyush Raj Sharma"}
+@app.get("/")
+def index():
+    return {"name": "Piyush Raj Sharma"}
 
 # # --------------------------------------------------------------------
 # # Endpoint to get a student by ID
