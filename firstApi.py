@@ -112,7 +112,7 @@ def get_student(
 # # - Uses '*' to force keyword-only arguments (FastAPI requires this)
 # # - Name is optional, age is required
 # # --------------------------------------------------------------------
-# @app.get("/get-by-name")
+@app.get("/get-by-name")
 def get_student(
     *,
     name: str = Query(None, description="Name of the student"),  # Optional query param
