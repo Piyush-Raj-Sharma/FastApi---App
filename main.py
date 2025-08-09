@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange  # ✅ Import added
@@ -7,14 +7,16 @@ app = FastAPI()
 
 # In-memory data store
 my_posts = [
-    {
-        "title": 1,
+    {   
+        "id" : 1,
+        "title": "Hello Duniya",
         "content": "Learning FastAPI",
         "published": True,
         "ratings": "5 STAR"
     },
     {
-        "title": 2,
+        "id" : 2,
+        "title": "Kya haal chaal",
         "content": "Learned React/Redux",
         "published": False,
         "ratings": "4 STAR"
@@ -59,3 +61,12 @@ def create_post(post: Post):
     my_posts.append(post_dict)  # ✅ Fixed append
 
     return {"message": "Post created successfully", "post": post_dict}
+
+#Endpoint for fetching the post with the specific ID
+@app.get("/post/{post_id}")
+def fetch_post(post_id : int = Path(..., description = "Id of the post to be fetched")):
+    for existing_post in my_posts:
+        if existing_post['id'] == post_id:
+            return existing_post
+    return {"Error" : "Post with the given ID doesn't exists"}
+
