@@ -37,6 +37,12 @@ class Post(BaseModel):
     published: bool = True         # Optional with default
     ratings: Optional[str] = None  # Completely optional
 
+#Function to find the Index of the post with the given ID
+def find_post_id(id):
+    for index, post in enumerate(my_posts):
+        if id == post["id"]:
+            return index
+
 
 @app.get("/")
 def root():
@@ -87,7 +93,6 @@ response : Response):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
     # return {"Error": "Post with the given ID does not exist"}
 
-
 """
 IMPORTANT: Endpoint ordering in FastAPI
 ----------------------------------------
@@ -112,3 +117,13 @@ dynamic parameter routes (e.g., '/post/{post_id}') to avoid conflicts.
 #     """
 #     latest_post = my_posts[len(my_posts) - 1]
 #     return {"latest post": latest_post}
+
+
+#Endpoint: Delete the post with the given ID
+@app.delete("/post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
+def delete_post(post_id : int ):
+    index = find_post_id(post_id)
+    if index == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
+    my_posts.pop(index)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
