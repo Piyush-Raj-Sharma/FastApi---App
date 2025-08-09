@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+from random import randrange  # ✅ Import added
 
 app = FastAPI()
 
@@ -53,5 +54,8 @@ def create_post(post: Post):
             raise HTTPException(status_code=400, detail="This post ID already exists")
     
     # Append new post as dictionary
-    my_posts.append(post.dict())
-    return {"message": "Post created successfully", "post": post}
+    post_dict = post.dict()
+    post_dict['id'] = randrange(0, 100000)
+    my_posts.append(post_dict)  # ✅ Fixed append
+
+    return {"message": "Post created successfully", "post": post_dict}
