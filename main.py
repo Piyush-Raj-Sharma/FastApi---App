@@ -62,11 +62,48 @@ def create_post(post: Post):
 
     return {"message": "Post created successfully", "post": post_dict}
 
-#Endpoint for fetching the post with the specific ID
+
+# Endpoint for fetchiung the latest post
+@app.get("/post/latest")
+def fetch_latest_post():
+    latetst_post = my_posts[len(my_posts) - 1]
+    return {"latest post " : latetst_post}
+
+# Endpoint: Fetch a specific post by its unique ID
 @app.get("/post/{post_id}")
-def fetch_post(post_id : int = Path(..., description = "Id of the post to be fetched")):
+def fetch_post(post_id: int = Path(..., description="ID of the post to retrieve")):
+    """
+    This endpoint searches for a post in 'my_posts' by matching the provided post_id.
+    - If a matching post is found, it returns the post.
+    - If no match is found, it returns an error message.
+    """
     for existing_post in my_posts:
         if existing_post['id'] == post_id:
             return existing_post
-    return {"Error" : "Post with the given ID doesn't exists"}
+    return {"Error": "Post with the given ID does not exist"}
 
+
+"""
+IMPORTANT: Endpoint ordering in FastAPI
+----------------------------------------
+FastAPI processes routes in a **top-to-bottom** order. 
+If we define '/post/{post_id}' before '/post/latest', 
+then any request to '/post/latest' will match '/post/{post_id}' first, 
+because FastAPI will interpret 'latest' as a post_id parameter.
+
+Since 'latest' is not an integer, FastAPI will throw a validation error:
+    "Input should be a valid integer, unable to parse string as an integer."
+
+Solution: Always place more specific routes (e.g., '/post/latest') ABOVE 
+dynamic parameter routes (e.g., '/post/{post_id}') to avoid conflicts.
+"""
+
+# Endpoint: Fetch the most recently added post
+# @app.get("/post/latest")
+# def fetch_latest_post():
+#     """
+#     Retrieves the last post from 'my_posts' list.
+#     Assumes posts are stored in the order they were created.
+#     """
+#     latest_post = my_posts[len(my_posts) - 1]
+#     return {"latest post": latest_post}
