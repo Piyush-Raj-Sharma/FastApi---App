@@ -32,7 +32,7 @@ my_posts = [
 """
 
 class Post(BaseModel):
-    title: int                     # Required
+    title: str                     # Required
     content: str                   # Required
     published: bool = True         # Optional with default
     ratings: Optional[str] = None  # Completely optional
@@ -127,3 +127,15 @@ def delete_post(post_id : int ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
     my_posts.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+#Endpoint: Update post with the given ID
+@app.put("/post/{post_id}")
+def update_post(post_id : int, post : Post):
+    index = find_post_id(post_id)
+    if index == None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
+    post_dict = post.dict()
+    post_dict['id'] = post_id
+    my_posts[index] = post_dict
+    return {"data" : post_dict}
