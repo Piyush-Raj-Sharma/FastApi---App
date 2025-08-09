@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI, HTTPException, Path, status, Response
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange  # ✅ Import added
@@ -71,7 +71,8 @@ def fetch_latest_post():
 
 # Endpoint: Fetch a specific post by its unique ID
 @app.get("/post/{post_id}")
-def fetch_post(post_id: int = Path(..., description="ID of the post to retrieve")):
+def fetch_post(*, post_id: int = Path(..., description="ID of the post to retrieve"),
+response : Response):
     """
     This endpoint searches for a post in 'my_posts' by matching the provided post_id.
     - If a matching post is found, it returns the post.
@@ -80,6 +81,7 @@ def fetch_post(post_id: int = Path(..., description="ID of the post to retrieve"
     for existing_post in my_posts:
         if existing_post['id'] == post_id:
             return existing_post
+        response.status_code = status.HTTP_404_NOT_FOUND #Help to set the HTTP response code for better understanding to the frontend
     return {"Error": "Post with the given ID does not exist"}
 
 
