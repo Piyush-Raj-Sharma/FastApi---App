@@ -48,8 +48,8 @@ def get_posts():
     return {"posts": my_posts}
 
 
-@app.post("/posts")
-def create_post(post: Post):
+@app.post("/posts", status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
+def create_post(post: Post):  
     # Check if a post with the same title ID already exists
     for existing_post in my_posts:
         if existing_post["title"] == post.title:
@@ -70,7 +70,7 @@ def fetch_latest_post():
     return {"latest post " : latetst_post}
 
 # Endpoint: Fetch a specific post by its unique ID
-@app.get("/post/{post_id}")
+@app.get("/post/{post_id}") 
 def fetch_post(*, post_id: int = Path(..., description="ID of the post to retrieve"),
 response : Response):
     """
@@ -81,8 +81,11 @@ response : Response):
     for existing_post in my_posts:
         if existing_post['id'] == post_id:
             return existing_post
-        response.status_code = status.HTTP_404_NOT_FOUND #Help to set the HTTP response code for better understanding to the frontend
-    return {"Error": "Post with the given ID does not exist"}
+        # response.status_code = status.HTTP_404_NOT_FOUND
+        #Help to set the HTTP response code for better understanding to the frontend
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
+    # return {"Error": "Post with the given ID does not exist"}
 
 
 """
