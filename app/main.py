@@ -197,10 +197,19 @@ def delete_post(post_id : int ):
 #Endpoint: Update post with the given ID
 @app.put("/post/{post_id}")
 def update_post(post_id : int, post : Post):
-    index = find_post_id(post_id)
-    if index == None:
+
+    with pool.connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE post_id = %s RETURNING * """, (post.title, post.content, post.published, post_id))
+            updated_post = cursor.fetchone()
+            conn.commit()
+    if updated_post is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
-    post_dict = post.dict()
-    post_dict['id'] = post_id
-    my_posts[index] = post_dict
-    return {"data" : post_dict}
+    return {"data" : updated_post}
+    # index = find_post_id(post_id)
+    # if index == None:
+    # post_dict = post.dict()
+    # post_dict['id'] = post_id
+    # my_posts[index] = post_dict
+
+
