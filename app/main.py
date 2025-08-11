@@ -14,7 +14,7 @@ app = FastAPI()
 # In-memory data store
 my_posts = [
     {   
-        "id" 
+        "id": 1, 
         "title": "Hello Duniya",
         "content": "Learning FastAPI",
         "published": True,
@@ -62,7 +62,7 @@ Steps:
 #         print("Error:", error)
 #         time.sleep(2)
 
-
+# -------Added this to db.py -----------
 
 """
     Using Pydantic's BaseModel to ensure incoming user data matches the schema:
@@ -106,12 +106,17 @@ def create_post(post: Post):
         if existing_post["title"] == post.title:
             raise HTTPException(status_code=400, detail="This post ID already exists")
     
-    # Append new post as dictionary
-    post_dict = post.dict()
-    post_dict['id'] = randrange(0, 100000)
-    my_posts.append(post_dict)  # ✅ Fixed append
+    # # Append new post as dictionary
+    # post_dict = post.dict()
+    # post_dict['id'] = randrange(0, 100000)
+    # my_posts.append(post_dict)  # ✅ Fixed append
 
-    return {"message": "Post created successfully", "post": post_dict}
+    with pool.connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """ , (post.title, post.content, post.published))  
+            new_post = cursor.fetchone()
+            conn.commit()
+    return {"message": "Post created successfully", "post": new_post}
 
 
 # Endpoint for fetchiung the latest post
