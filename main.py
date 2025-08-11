@@ -2,6 +2,10 @@ from fastapi import FastAPI, HTTPException, Path, status, Response
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange  # ✅ Import added
+import psycopg
+# from psycopg.extras import RealDictCursor  #in psycopg2
+from psycopg.rows import dict_row
+import time
 
 app = FastAPI()
 
@@ -23,6 +27,18 @@ my_posts = [
     }
 ]
 
+while True:
+    try:
+        with psycopg.connect(host='localhost', dbname='fastapi', user='postgres', password='@Piyush#123') as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                print("database connection established successfully")
+        break
+    except Exception as error:
+        print("Connecting to database failed")
+        print("Error:", error)
+        time.sleep(2)
+
+
 """
     Using Pydantic's BaseModel to ensure incoming user data matches the schema:
     - Automatic type validation (int, str, bool, etc.)
@@ -35,7 +51,7 @@ class Post(BaseModel):
     title: str                     # Required
     content: str                   # Required
     published: bool = True         # Optional with default
-    ratings: Optional[str] = None  # Completely optional
+    # ratings: Optional[str] = None  # Completely optional
 
 #Function to find the Index of the post with the given ID
 def find_post_id(id):
