@@ -4,7 +4,9 @@ from typing import Optional
 from random import randrange  # ✅ Import added
 import psycopg
 # from psycopg.extras import RealDictCursor  #in psycopg2
-from psycopg.rows import dict_row
+# from psycopg.rows import dict_row  # Allows rows to be returned as dictionaries
+from app.db import pool
+
 import time
 
 app = FastAPI()
@@ -12,7 +14,7 @@ app = FastAPI()
 # In-memory data store
 my_posts = [
     {   
-        "id" : 1,
+        "id" 
         "title": "Hello Duniya",
         "content": "Learning FastAPI",
         "published": True,
@@ -27,16 +29,39 @@ my_posts = [
     }
 ]
 
-while True:
-    try:
-        with psycopg.connect(host='localhost', dbname='fastapi', user='postgres', password='@Piyush#123') as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                print("database connection established successfully")
-        break
-    except Exception as error:
-        print("Connecting to database failed")
-        print("Error:", error)
-        time.sleep(2)
+
+"""
+This loop keeps trying to connect to a PostgreSQL database until it succeeds.
+It is useful when the database might not be ready immediately (e.g., during app startup).
+
+Steps:
+1. Start an infinite loop (`while True`), so the connection attempt repeats until successful.
+2. Inside `try`, attempt to connect to PostgreSQL using psycopg3:
+   - `host`: Where the database is hosted (here, localhost).
+   - `dbname`: Name of the database to connect to.
+   - `user` & `password`: Database login credentials.
+3. If the connection is successful, create a cursor (`conn.cursor`) with `row_factory=dict_row`:
+   - This makes each row returned from queries behave like a Python dictionary 
+     instead of a tuple, allowing access by column name.
+4. Print a success message: "database connection established successfully".
+5. Exit the loop using `break` (so we stop retrying once connected).
+6. If an exception occurs (e.g., DB server is down, wrong credentials):
+   - Print an error message.
+   - Print the exact error details.
+   - Wait 2 seconds (`time.sleep(2)`) before retrying the connection.
+"""
+
+# while True:
+#     try:
+#         with psycopg.connect(host='localhost', dbname='fastapi', user='postgres', password='@Piyush#123') as conn:
+#             with conn.cursor(row_factory=dict_row) as cursor:
+#                 print("database connection established successfully")
+#         break
+#     except Exception as error:
+#         print("Connecting to database failed")
+#         print("Error:", error)
+#         time.sleep(2)
+
 
 
 """
@@ -66,8 +91,12 @@ def root():
 
 
 @app.get("/posts")
-def get_posts():
-    return {"posts": my_posts}
+async def get_posts():
+    with pool.connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" Select * from posts""")
+            posts = cursor.fetchall()
+    return {"posts": posts}
 
 
 @app.post("/posts", status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
