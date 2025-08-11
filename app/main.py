@@ -134,13 +134,23 @@ response : Response):
     - If a matching post is found, it returns the post.
     - If no match is found, it returns an error message.
     """
-    for existing_post in my_posts:
-        if existing_post['id'] == post_id:
-            return existing_post
+    # for existing_post in my_posts:
+    #     if existing_post['id'] == post_id:
+    #         return existing_post
         # response.status_code = status.HTTP_404_NOT_FOUND
         #Help to set the HTTP response code for better understanding to the frontend
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
+    with pool.connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT * FROM posts WHERE post_id = %s """, (post_id,))
+            post = cursor.fetchone()
+            if not post:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
+            return post
+
+
+
+    # raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
     # return {"Error": "Post with the given ID does not exist"}
 
 """
@@ -172,10 +182,15 @@ dynamic parameter routes (e.g., '/post/{post_id}') to avoid conflicts.
 #Endpoint: Delete the post with the given ID
 @app.delete("/post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
 def delete_post(post_id : int ):
-    index = find_post_id(post_id)
-    if index == None:
+    # index = find_post_id(post_id)
+    with pool.connection() as conn:
+        with conn.cursor() as cursor :
+            cursor.execute(""" DELETE FROM posts WHERE post_id = %s RETURNING * """, (post_id,))
+            deleted_post = cursor.fetchone()
+            conn.commit()
+    if deleted_post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
-    my_posts.pop(index)
+    # my_posts.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
