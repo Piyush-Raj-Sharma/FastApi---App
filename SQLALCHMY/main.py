@@ -10,11 +10,10 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-@app.get("/orm-posts")
-async def get_posts(db: Session = Depends(get_db)):
+@app.get("/orm-posts", response_model=list[schemas.PostResponse])
+def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
-    return {"posts": posts}
-
+    return posts
 
 
 @app.post("/orm-posts", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
@@ -26,25 +25,14 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     db.refresh(new_post)
     return new_post
 
-
-# # Endpoint for fetchiung the latest post
-# # @app.get("/post/latest")
-# # def fetch_latest_post():
-# #     latetst_post = my_posts[len(my_posts) - 1]
-# #     return {"latest post " : latetst_post}
-
 # # Endpoint: Fetch a specific post by its unique ID
-# @app.get("/post/{post_id}") 
-# def fetch_post(*, post_id: int = Path(..., description="ID of the post to retrieve"),
-# response : Response):
-
-#     with pool.connection() as conn:
-#         with conn.cursor() as cursor:
-#             cursor.execute(""" SELECT * FROM posts WHERE post_id = %s """, (post_id,))
-#             post = cursor.fetchone()
-#             if not post:
-#                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
-#             return post
+@app.get("/orm-posts/{post_id}", response_model=schemas.PostResponse) 
+def fetch_post(*, post_id: int = Path(..., description="ID of the post to retrieve"),
+db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
+    return post
 
 # #Endpoint: Delete the post with the given ID
 # @app.delete("/post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
