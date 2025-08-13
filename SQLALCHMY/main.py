@@ -2,31 +2,22 @@ from fastapi import FastAPI, HTTPException, Path, status, Response, Depends
 from pydantic import BaseModel
 from random import randrange 
 from app.db import pool
-from .database import Base, engine
+from .database import Base, engine, get_db
 from . import models
-from .database import SessionLocal
 from sqlalchemy.orm import Session
 from .models import Post
 
 Base.metadata.create_all(bind=engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 app = FastAPI()
 
-@app.post("/users")
-def create_user(name: str, email: str, db: Session = Depends(get_db)):
-    new_user = Post(name=name, email=email)
-    db.add(new_user)
+def create_post(title: str, content: str, db: Session = Depends(get_db)):
+    new_post = Post(title=title, content=content)  # published will default to True
+    db.add(new_post)
     db.commit()
-    db.refresh(new_user)
-    return new_user
+    db.refresh(new_post)
+    return new_post
+
 
 # @app.get("/")
 # def root():
