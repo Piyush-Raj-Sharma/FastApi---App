@@ -2,25 +2,12 @@ from fastapi import FastAPI, HTTPException, Path, status, Response, Depends
 from random import randrange 
 from app.db import pool
 from .database import Base, engine, get_db
-from . import models
+from . import models, schemas
 from sqlalchemy.orm import Session
-from .models import Post
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-# def create_post(title: str, content: str, db: Session = Depends(get_db)):
-#     new_post = Post(title=title, content=content)  # published will default to True
-#     db.add(new_post)
-#     db.commit()
-#     db.refresh(new_post)
-#     return new_post
-
-
-# @app.get("/")
-# def root():
-#     return {"message": "Hello from the social media app"}
 
 
 @app.get("/orm-posts")
@@ -29,13 +16,15 @@ async def get_posts(db: Session = Depends(get_db)):
     return {"posts": posts}
 
 
-# @app.post("/posts", status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
-# def create_post(post: Post, db: Session = Depends(get_db)):  
-#     new_post = models.Post(title = post.title, content = post.content, published = post.published)
-#     db.add(new_post)
-#     db.commit()
-#     db.refresh(new_post)
-#     return {"message": "Post created successfully", "post": new_post}
+
+@app.post("/orm-posts", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
+def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):  
+    new_post = models.Post(**post.dict())
+    # new_post = models.Post(title=post.title, content=post.content, published=post.published)
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
 
 
 # # Endpoint for fetchiung the latest post
