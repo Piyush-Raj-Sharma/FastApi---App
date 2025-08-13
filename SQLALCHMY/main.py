@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException, Path, status, Response, Depends
-from pydantic import BaseModel
 from random import randrange 
 from app.db import pool
 from .database import Base, engine, get_db
@@ -11,12 +10,12 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-def create_post(title: str, content: str, db: Session = Depends(get_db)):
-    new_post = Post(title=title, content=content)  # published will default to True
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
+# def create_post(title: str, content: str, db: Session = Depends(get_db)):
+#     new_post = Post(title=title, content=content)  # published will default to True
+#     db.add(new_post)
+#     db.commit()
+#     db.refresh(new_post)
+#     return new_post
 
 
 # @app.get("/")
@@ -24,27 +23,18 @@ def create_post(title: str, content: str, db: Session = Depends(get_db)):
 #     return {"message": "Hello from the social media app"}
 
 
-# @app.get("/posts")
-# async def get_posts():
-#     with pool.connection() as conn:
-#         with conn.cursor() as cursor:
-#             cursor.execute(""" Select * from posts""")
-#             posts = cursor.fetchall()
-#     return {"posts": posts}
+@app.get("/orm-posts")
+async def get_posts(db: Session = Depends(get_db)):
+    posts = db.query(models.Post).all()
+    return {"posts": posts}
 
 
 # @app.post("/posts", status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
-# def create_post(post: Post):  
-#     # Check if a post with the same title ID already exists
-#     for existing_post in my_posts:
-#         if existing_post["title"] == post.title:
-#             raise HTTPException(status_code=400, detail="This post ID already exists")
-
-#     with pool.connection() as conn:
-#         with conn.cursor() as cursor:
-#             cursor.execute(""" INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """ , (post.title, post.content, post.published))  
-#             new_post = cursor.fetchone()
-#             conn.commit()
+# def create_post(post: Post, db: Session = Depends(get_db)):  
+#     new_post = models.Post(title = post.title, content = post.content, published = post.published)
+#     db.add(new_post)
+#     db.commit()
+#     db.refresh(new_post)
 #     return {"message": "Post created successfully", "post": new_post}
 
 
