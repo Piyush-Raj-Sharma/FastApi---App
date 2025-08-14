@@ -34,6 +34,20 @@ db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
     return post
 
+# #Endpoint: Update post with the given ID
+@app.put("/orm-post/{post_id}", response_model = schemas.PostResponse)
+def update_post(post_id : int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)):
+
+    post_query = db.query(models.Post).filter(models.Post.post_id == post_id)
+    post = post_query.first()
+
+    if updated_post is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
+    post_query.update(updated_post.dict(), synchronize_session=False)
+    db.commit()
+    return post_query.first()
+
+
 # #Endpoint: Delete the post with the given ID
 # @app.delete("/post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
 # def delete_post(post_id : int ):
@@ -46,15 +60,3 @@ db: Session = Depends(get_db)):
 #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
 #     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-# #Endpoint: Update post with the given ID
-# @app.put("/post/{post_id}")
-# def update_post(post_id : int, post : Post):
-
-#     with pool.connection() as conn:
-#         with conn.cursor() as cursor:
-#             cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE post_id = %s RETURNING * """, (post.title, post.content, post.published, post_id))
-#             updated_post = cursor.fetchone()
-#             conn.commit()
-#     if updated_post is None:
-#         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
-#     return {"data" : updated_post}
