@@ -49,14 +49,14 @@ def update_post(post_id : int, updated_post: schemas.PostUpdate, db: Session = D
 
 
 # #Endpoint: Delete the post with the given ID
-# @app.delete("/post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
-# def delete_post(post_id : int ):
-#     with pool.connection() as conn:
-#         with conn.cursor() as cursor :
-#             cursor.execute(""" DELETE FROM posts WHERE post_id = %s RETURNING * """, (post_id,))
-#             deleted_post = cursor.fetchone()
-#             conn.commit()
-#     if deleted_post is None:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
-#     return Response(status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/orm-post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
+def delete_post(post_id : int, db: Session = Depends(get_db) ):
+    post_query = db.query(models.Post).filter(models.Post.post_id == post_id)
+
+    if not post_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
+    post_query.delete(synchronize_session=False)
+    db.commit()
+    return None
+
 
