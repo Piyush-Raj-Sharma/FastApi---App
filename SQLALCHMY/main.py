@@ -15,13 +15,13 @@ def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
 
-@app.get("orm-post/latest", response_model = schemas.PostResponse)
+@app.get("/orm-posts/latest", response_model = schemas.PostResponse)
 def fetch_latest_post(db: Session = Depends(get_db)):
-    post = db.query(models.Post).first()
+    post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"Post not found")
     return post
     
-
-
 @app.post("/orm-posts", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):  
     new_post = models.Post(**post.dict())
