@@ -15,6 +15,12 @@ def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
 
+@app.get("orm-post/latest", response_model = schemas.PostResponse)
+def fetch_latest_post(db: Session = Depends(get_db)):
+    post = db.query(models.Post).first()
+    return post
+    
+
 
 @app.post("/orm-posts", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):  
@@ -25,7 +31,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     db.refresh(new_post)
     return new_post
 
-# # Endpoint: Fetch a specific post by its unique ID
+# Endpoint: Fetch a specific post by its unique ID
 @app.get("/orm-posts/{post_id}", response_model=schemas.PostResponse) 
 def fetch_post(*, post_id: int = Path(..., description="ID of the post to retrieve"),
 db: Session = Depends(get_db)):
@@ -34,7 +40,7 @@ db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
     return post
 
-# #Endpoint: Update post with the given ID
+#Endpoint: Update post with the given ID
 @app.put("/orm-post/{post_id}", response_model = schemas.PostResponse)
 def update_post(post_id : int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)):
 
@@ -48,7 +54,7 @@ def update_post(post_id : int, updated_post: schemas.PostUpdate, db: Session = D
     return post_query.first()
 
 
-# #Endpoint: Delete the post with the given ID
+#Endpoint: Delete the post with the given ID
 @app.delete("/orm-post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
 def delete_post(post_id : int, db: Session = Depends(get_db) ):
     post_query = db.query(models.Post).filter(models.Post.post_id == post_id)
