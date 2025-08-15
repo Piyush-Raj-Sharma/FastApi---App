@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 # Base schema (shared)
@@ -22,3 +22,21 @@ class PostResponse(PostBase):
 
     class Config:
         orm_mode = True  # Important for SQLAlchemy objects
+
+
+class UserBase(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserCreate(UserBase):
+    pass
+
+class UserUpdate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    user_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
