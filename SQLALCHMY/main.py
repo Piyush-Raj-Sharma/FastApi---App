@@ -47,7 +47,7 @@ def update_post(post_id : int, updated_post: schemas.PostUpdate, db: Session = D
     post_query = db.query(models.Post).filter(models.Post.post_id == post_id)
     post = post_query.first()
 
-    if updated_post is None:
+    if post is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
     post_query.update(updated_post.dict(), synchronize_session=False)
     db.commit()
