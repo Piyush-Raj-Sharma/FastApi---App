@@ -24,6 +24,9 @@ class PostResponse(PostBase):
         orm_mode = True  # Important for SQLAlchemy objects
 
 
+# --------------------------------------------------------
+# USER SCHEMAS
+
 class UserBase(BaseModel):
     email: EmailStr
     password: str
