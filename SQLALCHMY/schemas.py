@@ -44,6 +44,7 @@ class UserUpdate(UserBase):
 class UserResponse(BaseModel):
     user_id: int
     email: EmailStr
+    password: str
     created_at: datetime
 
     class Config:

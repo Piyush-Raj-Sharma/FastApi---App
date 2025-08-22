@@ -73,6 +73,9 @@ def delete_post(post_id : int, db: Session = Depends(get_db) ):
 #Endpoint for creating Users
 @app.post('/users', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    hashed_password = pwd_context.hash(user.password)
+    user.password = hashed_password
+
     new_user = models.User(**user.dict())
     db.add(new_user)
     db.commit()
@@ -123,3 +126,5 @@ def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(ge
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
