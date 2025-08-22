@@ -4,7 +4,10 @@ from app.db import pool
 from .database import Base, engine, get_db
 from . import models, schemas
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 
+
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -95,5 +98,4 @@ def delete_user(user_id: int, db: Session=Depends(get_db)):
     post_query.delete(synchronize_session=False)
     db.commit()
     return None
-
 

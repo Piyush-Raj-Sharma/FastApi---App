@@ -13,7 +13,8 @@ dependencies = [
     "psycopg[pool] (>=3.2.9,<4.0.0)",
     "sqlalchemy (>=2.0.43,<3.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
-    "email-validator (>=2.2.0,<3.0.0)"
+    "email-validator (>=2.2.0,<3.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)"
 ]
 
 

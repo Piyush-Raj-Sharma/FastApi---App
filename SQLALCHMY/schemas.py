@@ -37,8 +37,9 @@ class UserCreate(UserBase):
 class UserUpdate(UserBase):
     password: str
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     user_id: int
+    email: EmailStr
     created_at: datetime
 
     class Config:
