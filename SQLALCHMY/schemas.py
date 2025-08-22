@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 # Base schema (shared)
 class PostBase(BaseModel):
@@ -12,8 +13,10 @@ class PostCreate(PostBase):
     pass
 
 # For updating a post
-class PostUpdate(PostBase):
-    pass
+class PostUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    published: Optional[bool] = None
 
 # Response schema
 class PostResponse(PostBase):
@@ -35,7 +38,8 @@ class UserCreate(UserBase):
     pass
 
 class UserUpdate(UserBase):
-    password: str
+    password: Optional[str] = None
+    email: Optional[EmailStr] = None
 
 class UserResponse(BaseModel):
     user_id: int
@@ -44,3 +48,4 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True
+        

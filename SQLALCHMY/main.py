@@ -12,7 +12,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
 @app.get("/orm-posts", response_model=list[schemas.PostResponse])
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
@@ -70,6 +69,8 @@ def delete_post(post_id : int, db: Session = Depends(get_db) ):
 
 # -----------------------------------------------------------------------------
 
+
+#Endpoint for creating Users
 @app.post('/users', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     new_user = models.User(**user.dict())
@@ -78,11 +79,13 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+#Endopoint for fetching all Users
 @app.get('/users', response_model=list[schemas.UserResponse])
 def fetch_all_user(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
+#Endpoint for fetching specific Users
 @app.get("/users/{user_id}", response_model=schemas.UserResponse)
 def fetch_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.user_id == user_id).first()
@@ -90,12 +93,33 @@ def fetch_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"user with the User_ID: {user_id} was not found")
     return user
 
+#Endpoint for deleting Specific user
 @app.delete('/users/{user_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session=Depends(get_db)):
-    post_query = db.query(models.User).filter(models.User.user_id == user_id)
-    if not post_query:
+    user_query = db.query(models.User).filter(models.User.user_id == user_id)
+    if not user_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the User_ID: {user_id} was not found")
-    post_query.delete(synchronize_session=False)
+    user_query.delete(synchronize_session=False)
     db.commit()
     return None
 
+#Endpoint for updating User Data
+@app.patch('/users/{user_id}', response_model=schemas.UserResponse)
+def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
+    user_query = db.query(models.User).filter(models.User.user_id == user_id)
+    db_user = user_query.first()
+
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"User with ID {user_id} was not found"
+        )
+    
+    # Only update provided fields (exclude_unset ignores missing ones)
+    user_data = user.dict(exclude_unset=True)
+    for key, value in user_data.items():
+        setattr(db_user, key, value)
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
