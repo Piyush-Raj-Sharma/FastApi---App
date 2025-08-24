@@ -3,7 +3,7 @@ from ..database import get_db
 from .. import models, schemas, utils
 from sqlalchemy.orm import Session
 
-router = APIRouter()
+router = APIRouter(prefix = "/users")
 
 #Endpoint for creating Users
 @router.post('/users', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
@@ -18,13 +18,13 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 #Endopoint for fetching all Users
-@router.get('/users', response_model=list[schemas.UserResponse])
+@router.get('/', response_model=list[schemas.UserResponse])
 def fetch_all_user(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
 #Endpoint for fetching specific Users
-@router.get("/users/{user_id}", response_model=schemas.UserResponse)
+@router.get("/{user_id}", response_model=schemas.UserResponse)
 def fetch_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.user_id == user_id).first()
     if not user:
@@ -32,7 +32,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 #Endpoint for deleting Specific user
-@router.delete('/users/{user_id}', status_code = status.HTTP_204_NO_CONTENT)
+@router.delete('/{user_id}', status_code = status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session=Depends(get_db)):
     user_query = db.query(models.User).filter(models.User.user_id == user_id)
     if not user_query:
@@ -42,7 +42,7 @@ def delete_user(user_id: int, db: Session=Depends(get_db)):
     return None
 
 #Endpoint for updating User Data
-@router.patch('/users/{user_id}', response_model=schemas.UserResponse)
+@router.patch('/{user_id}', response_model=schemas.UserResponse)
 def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
     user_query = db.query(models.User).filter(models.User.user_id == user_id)
     db_user = user_query.first()
