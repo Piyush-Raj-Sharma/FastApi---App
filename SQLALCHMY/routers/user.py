@@ -3,7 +3,9 @@ from ..database import get_db
 from .. import models, schemas, utils
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix = "/users")
+router = APIRouter(
+    prefix = "/users",
+    tags = ['User'])
 
 #Endpoint for creating Users
 @router.post('/users', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
