@@ -4,125 +4,17 @@ from app.db import pool
 from .database import Base, engine, get_db
 from . import models, schemas, utils
 from sqlalchemy.orm import Session
+from .routers import post, user 
 
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-@app.get("/orm-posts", response_model=list[schemas.PostResponse])
-def get_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return posts
+app.include_router(post.router)
+app.include_router(user.router)
 
-@app.get("/orm-posts/latest", response_model = schemas.PostResponse)
-def fetch_latest_post(db: Session = Depends(get_db)):
-    post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"Post not found")
-    return post
-    
-@app.post("/orm-posts", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
-def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):  
-    new_post = models.Post(**post.dict())
-    # new_post = models.Post(title=post.title, content=post.content, published=post.published)
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
-
-# Endpoint: Fetch a specific post by its unique ID
-@app.get("/orm-posts/{post_id}", response_model=schemas.PostResponse) 
-def fetch_post(*, post_id: int = Path(..., description="ID of the post to retrieve"),
-db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.post_id == post_id).first()
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"post with the ID: {post_id} was not found")
-    return post
-
-#Endpoint: Update post with the given ID
-@app.put("/orm-post/{post_id}", response_model = schemas.PostResponse)
-def update_post(post_id : int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)):
-
-    post_query = db.query(models.Post).filter(models.Post.post_id == post_id)
-    post = post_query.first()
-
-    if post is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
-    post_query.update(updated_post.dict(), synchronize_session=False)
-    db.commit()
-    return post_query.first()
-
-
-#Endpoint: Delete the post with the given ID
-@app.delete("/orm-post/{post_id}", status_code = status.HTTP_204_NO_CONTENT)
-def delete_post(post_id : int, db: Session = Depends(get_db) ):
-    post_query = db.query(models.Post).filter(models.Post.post_id == post_id)
-
-    if not post_query:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with the ID: {post_id} was not found")
-    post_query.delete(synchronize_session=False)
-    db.commit()
-    return None
 
 # -----------------------------------------------------------------------------
-
-
-#Endpoint for creating Users
-@app.post('/users', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    hashed_password = utils.hash(user.password)
-    user.password = hashed_password
-
-    new_user = models.User(**user.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
-
-#Endopoint for fetching all Users
-@app.get('/users', response_model=list[schemas.UserResponse])
-def fetch_all_user(db: Session = Depends(get_db)):
-    users = db.query(models.User).all()
-    return users
-
-#Endpoint for fetching specific Users
-@app.get("/users/{user_id}", response_model=schemas.UserResponse)
-def fetch_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.user_id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"user with the User_ID: {user_id} was not found")
-    return user
-
-#Endpoint for deleting Specific user
-@app.delete('/users/{user_id}', status_code = status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, db: Session=Depends(get_db)):
-    user_query = db.query(models.User).filter(models.User.user_id == user_id)
-    if not user_query:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the User_ID: {user_id} was not found")
-    user_query.delete(synchronize_session=False)
-    db.commit()
-    return None
-
-#Endpoint for updating User Data
-@app.patch('/users/{user_id}', response_model=schemas.UserResponse)
-def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
-    user_query = db.query(models.User).filter(models.User.user_id == user_id)
-    db_user = user_query.first()
-
-    if not db_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"User with ID {user_id} was not found"
-        )
-    
-    # Only update provided fields (exclude_unset ignores missing ones)
-    user_data = user.dict(exclude_unset=True)
-    for key, value in user_data.items():
-        setattr(db_user, key, value)
-
-    db.commit()
-    db.refresh(db_user)
-    return db_user
 
 
