@@ -7,7 +7,7 @@ router = APIRouter(
     prefix="/orm-posts",
     tags=['Post'])
 
-@router.get("/", response_model=list[schemas.PostResponse])
+@router.get("", response_model=list[schemas.PostResponse])
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts 
@@ -19,7 +19,7 @@ def fetch_latest_post(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"Post not found")
     return post
     
-@router.post("/", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
+@router.post("", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):  
     new_post = models.Post(**post.dict())
     # new_post = models.Post(title=post.title, content=post.content, published=post.published)

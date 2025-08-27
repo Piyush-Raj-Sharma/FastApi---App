@@ -8,7 +8,7 @@ router = APIRouter(
     tags = ['User'])
 
 #Endpoint for creating Users
-@router.post('/users', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post('', response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
@@ -20,7 +20,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 #Endopoint for fetching all Users
-@router.get('/', response_model=list[schemas.UserResponse])
+@router.get('', response_model=list[schemas.UserResponse])
 def fetch_all_user(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
@@ -38,7 +38,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db)):
 def delete_user(user_id: int, db: Session=Depends(get_db)):
     user_query = db.query(models.User).filter(models.User.user_id == user_id)
     if not user_query:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the User_ID: {user_id} was not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with the User_ID: {user_id} was not found") 
     user_query.delete(synchronize_session=False)
     db.commit()
     return None
