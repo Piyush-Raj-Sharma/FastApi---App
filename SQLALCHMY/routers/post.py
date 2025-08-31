@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Path, status, Depends, APIRouter
 from ..database import get_db
-from .. import models, schemas
+from .. import models, schemas, oauth2
 from sqlalchemy.orm import Session
 
 router = APIRouter(
@@ -20,7 +20,7 @@ def fetch_latest_post(db: Session = Depends(get_db)):
     return post
     
 @router.post("", response_model=schemas.PostResponse , status_code = status.HTTP_201_CREATED)  #when we CREATE something we should give 201_created status code
-def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):  
+def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):  
     new_post = models.Post(**post.dict())
     # new_post = models.Post(title=post.title, content=post.content, published=post.published)
     db.add(new_post)
