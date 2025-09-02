@@ -23,6 +23,7 @@ def fetch_latest_post(db: Session = Depends(get_db)):
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):  
     new_post = models.Post(**post.dict())
     # new_post = models.Post(title=post.title, content=post.content, published=post.published)
+    print(new_post)
     db.add(new_post)
     db.commit()
     db.refresh(new_post) 
